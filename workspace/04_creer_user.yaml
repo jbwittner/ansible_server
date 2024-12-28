@@ -1,0 +1,44 @@
+- name: Ajouter un utilisateur
+  hosts: worskpace
+  become: true
+  vars:
+    new_user: jbwittner  # Nom du nouvel utilisateur
+    ssh_public_key_path: "~/.ssh/workspace_id_ed25519.pub"  # Chemin vers votre clé publique locale
+  tasks:
+    - name: Make sure we have a 'wheel' group
+      group:
+        name: wheel
+        state: present
+    
+    - name: Allow 'wheel' group to have passwordless sudo
+      lineinfile:
+        dest: /etc/sudoers
+        state: present
+        regexp: '^%wheel'
+        line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+        validate: visudo -cf %s
+    
+    - name: Créer l'utilisateur "{{ new_user }}"
+      user:
+        name: "{{ new_user }}"
+        groups: wheel
+        append: yes
+        shell: /bin/bash
+        create_home: true
+        state: present
+
+    - name: Créer le répertoire .ssh pour "{{ new_user }}"
+      file:
+        path: "/home/{{ new_user }}/.ssh"
+        state: directory
+        owner: "{{ new_user }}"
+        group: "{{ new_user }}"
+        mode: '0700'
+
+    - name: Ajouter une clé publique SSH pour "{{ new_user }}"
+      copy:
+        dest: "/home/{{ new_user }}/.ssh/authorized_keys"
+        content: "{{ lookup('file', ssh_public_key_path) }}"
+        owner: "{{ new_user }}"
+        group: "{{ new_user }}"
+        mode: '0600'

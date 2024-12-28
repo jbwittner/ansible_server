@@ -5,12 +5,12 @@
     new_user: jbwittner  # Nom du nouvel utilisateur
     ssh_public_key_path: "~/.ssh/workspace_id_ed25519.pub"  # Chemin vers votre clé publique locale
   tasks:
-    - name: Make sure we have a 'wheel' group
+    - name: Créer le groupe 'wheel'
       group:
         name: wheel
         state: present
     
-    - name: Allow 'wheel' group to have passwordless sudo
+    - name: Autoriser les membres du groupe 'wheel' à utiliser sudo sans mot de passe
       lineinfile:
         dest: /etc/sudoers
         state: present

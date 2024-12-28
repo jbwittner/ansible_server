@@ -1,0 +1,6 @@
+- name: Vérification de la configuration Ansible
+  hosts: worskpace
+  become: false  # Pas besoin d'utiliser sudo pour un simple test
+  tasks:
+    - name: Vérifier la connectivité avec le module ping
+      ping:

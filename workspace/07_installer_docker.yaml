@@ -1,0 +1,31 @@
+- name: Installer Docker
+  hosts: workspace
+  become: true
+
+  tasks:
+    - name: Installer dnf-plugins-core
+      dnf:
+        name: dnf-plugins-core
+        state: present
+    
+    - name: install docker repository
+      command: dnf-3 config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+
+    - name: Installer Docker
+      dnf:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+
+    - name: Démarrer et activer le service Docker
+      command: systemctl enable --now docker
+
+    - name: Activer le service docker
+      command: systemctl enable docker.service
+
+    - name: Activer le service containerd
+      command: systemctl enable containerd.service

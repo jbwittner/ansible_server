@@ -56,3 +56,12 @@
         owner: "{{ user }}"
         group: "{{ user }}"
         mode: "0600"
+
+    - name: Afficher le contenu d'un fichier
+      ansible.builtin.command:
+        cmd: cat {{ssh_key_path}}.pub
+      register: ssh_key_contenu
+
+    - name: Afficher le contenu dans la sortie Ansible
+      ansible.builtin.debug:
+        msg: "{{ ssh_key_contenu.stdout }}"

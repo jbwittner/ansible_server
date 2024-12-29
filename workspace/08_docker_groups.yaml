@@ -1,0 +1,17 @@
+- name: Docker groups
+  hosts: workspace
+  become: true
+  vars:
+    user: jbwittner
+
+  tasks:
+    - name: Ensure the docker group exists
+      ansible.builtin.group:
+        name: docker
+        state: present
+
+    - name: Add the user to the docker group
+      ansible.builtin.user:
+        name: "{{ user }}"
+        groups: docker
+        append: yes

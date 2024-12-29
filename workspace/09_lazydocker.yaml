@@ -2,7 +2,6 @@
   hosts: workspace
   become: true
   vars:
-    user: jbwittner
     version: 0.24.1
 
   tasks:

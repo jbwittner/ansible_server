@@ -3,32 +3,38 @@
   become: true
   vars:
     user: jbwittner  # Nom du nouvel utilisateur
+    ssh_key_path: "/home/{{ user }}/.ssh/github_id_ed25519"
   tasks:
-    - name: Générer une paire de clés SSH pour "{{ user }}" et GitHub
-      user:
+    - name: Vérifier si la clé SSH existe déjà
+      ansible.builtin.stat:
+        path: "{{ ssh_key_path }}"
+      register: ssh_key_check
+
+    - name: Générer une paire de clés SSH pour "{{ user }}" et GitHub si elle n'existe pas
+      ansible.builtin.user:
         name: "{{ user }}"
         generate_ssh_key: yes
         ssh_key_type: ed25519
-        ssh_key_file: .ssh/github_id_ed25519
+        ssh_key_file: ".ssh/github_id_ed25519"
         force: no
+      when: not ssh_key_check.stat.exists
 
     - name: Configurer le fichier SSH config pour GitHub
-      lineinfile:
+      ansible.builtin.blockinfile:
         path: "/home/{{ user }}/.ssh/config"
         create: yes
-        state: present
-        line: |
+        block: |
           Host github.com
             HostName github.com
             User git
-            IdentityFile /home/{{ user }}/.ssh/github_id_ed25519
+            IdentityFile {{ ssh_key_path }}
             IdentitiesOnly yes
         owner: "{{ user }}"
         group: "{{ user }}"
         mode: "0600"
 
     - name: Assurer les permissions correctes pour le dossier .ssh
-      file:
+      ansible.builtin.file:
         path: "/home/{{ user }}/.ssh"
         state: directory
         owner: "{{ user }}"
@@ -36,15 +42,15 @@
         mode: "0700"
 
     - name: Assurer les permissions correctes pour la clé privée
-      file:
-        path: "/home/{{ user }}/.ssh/github_id_ed25519"
+      ansible.builtin.file:
+        path: "{{ ssh_key_path }}"
         state: file
         owner: "{{ user }}"
         group: "{{ user }}"
         mode: "0600"
 
     - name: Assurer les permissions correctes pour le fichier SSH config
-      file:
+      ansible.builtin.file:
         path: "/home/{{ user }}/.ssh/config"
         state: file
         owner: "{{ user }}"

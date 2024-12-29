@@ -1,5 +1,5 @@
 - name: Configuration initiale du serveur
-  hosts: worskpace
+  hosts: workspace
   become: true
   tasks:
     # 1. Mettre à jour le système

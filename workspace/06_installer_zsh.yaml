@@ -1,0 +1,40 @@
+- name: Installer Zsh et Oh My Zsh
+  hosts: workspace
+  become: true
+  vars:
+    user: jbwittner  
+    zsh_path: "/bin/zsh"
+
+  tasks:
+    - name: Installer Zsh
+      package:
+        name: zsh
+        state: present
+
+    - name: Définir Zsh comme shell par défaut pour l'utilisateur
+      user:
+        name: "{{ user }}"
+        shell: "{{ zsh_path }}"
+
+    - name: Installer Git (nécessaire pour Oh My Zsh)
+      package:
+        name: git
+        state: present
+
+    - name: Vérifier si Oh My Zsh est déjà installé
+      stat:
+        path: "/home/{{ user }}/.oh-my-zsh"
+      register: oh_my_zsh_status
+
+    - name: Installer Oh My Zsh de manière non interactive
+      become_user: "{{ user }}"
+      shell: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+      when: not oh_my_zsh_status.stat.exists
+
+    - name: Assurer que le propriétaire du répertoire Oh My Zsh est correct
+      file:
+        path: "/home/{{ user }}/.oh-my-zsh"
+        state: directory
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        recurse: true

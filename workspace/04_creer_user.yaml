@@ -1,5 +1,5 @@
 - name: Ajouter un utilisateur
-  hosts: worskpace
+  hosts: workspace
   become: true
   vars:
     new_user: jbwittner  # Nom du nouvel utilisateur
@@ -42,3 +42,11 @@
         owner: "{{ new_user }}"
         group: "{{ new_user }}"
         mode: '0600'
+
+    - name: Créer le répertoire workspace pour "{{ new_user }}"
+      file:
+        path: "/home/{{ new_user }}/workspace"
+        state: directory
+        owner: "{{ new_user }}"
+        group: "{{ new_user }}"
+        mode: '0700'

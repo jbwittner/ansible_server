@@ -1,5 +1,5 @@
 - name: Configuration ssh du serveur
-  hosts: worskpace
+  hosts: workspace
   become: true
   vars:
     ssh_port: 22  # Port SSH (remplacez si nécessaire)

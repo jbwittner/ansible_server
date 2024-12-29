@@ -1,0 +1,52 @@
+- name: Créer une clé SSH pour un utilisateur
+  hosts: workspace
+  become: true
+  vars:
+    user: jbwittner  # Nom du nouvel utilisateur
+  tasks:
+    - name: Générer une paire de clés SSH pour "{{ user }}" et GitHub
+      user:
+        name: "{{ user }}"
+        generate_ssh_key: yes
+        ssh_key_type: ed25519
+        ssh_key_file: .ssh/github_id_ed25519
+        force: no
+
+    - name: Configurer le fichier SSH config pour GitHub
+      lineinfile:
+        path: "/home/{{ user }}/.ssh/config"
+        create: yes
+        state: present
+        line: |
+          Host github.com
+            HostName github.com
+            User git
+            IdentityFile /home/{{ user }}/.ssh/github_id_ed25519
+            IdentitiesOnly yes
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        mode: "0600"
+
+    - name: Assurer les permissions correctes pour le dossier .ssh
+      file:
+        path: "/home/{{ user }}/.ssh"
+        state: directory
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        mode: "0700"
+
+    - name: Assurer les permissions correctes pour la clé privée
+      file:
+        path: "/home/{{ user }}/.ssh/github_id_ed25519"
+        state: file
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        mode: "0600"
+
+    - name: Assurer les permissions correctes pour le fichier SSH config
+      file:
+        path: "/home/{{ user }}/.ssh/config"
+        state: file
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        mode: "0600"

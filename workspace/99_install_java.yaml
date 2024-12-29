@@ -4,12 +4,6 @@
   vars:
     user: jbwittner  # Nom de l'utilisateur cible
   tasks:
-    # 1. Vérifier que le répertoire home de l'utilisateur existe
-    - name: Vérifier que le répertoire home existe
-      file:
-        path: "/home/{{ user }}"
-        state: directory
-
     # 2. Installer les dépendances nécessaires pour SDKMAN!
     - name: Installer curl et zip (dépendances SDKMAN)
       apt:

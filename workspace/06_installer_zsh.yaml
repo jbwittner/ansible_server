@@ -2,39 +2,54 @@
   hosts: workspace
   become: true
   vars:
-    user: jbwittner  
+    user: jbwittner
     zsh_path: "/bin/zsh"
+    oh_my_zsh_install_script: "https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
+    oh_my_zsh_dir: "/home/{{ user }}/.oh-my-zsh"
 
   tasks:
     - name: Installer Zsh
-      package:
+      ansible.builtin.package:
         name: zsh
         state: present
 
     - name: Définir Zsh comme shell par défaut pour l'utilisateur
-      user:
+      ansible.builtin.user:
         name: "{{ user }}"
         shell: "{{ zsh_path }}"
 
     - name: Installer Git (nécessaire pour Oh My Zsh)
-      package:
+      ansible.builtin.package:
         name: git
         state: present
 
     - name: Vérifier si Oh My Zsh est déjà installé
-      stat:
-        path: "/home/{{ user }}/.oh-my-zsh"
+      ansible.builtin.stat:
+        path: "{{ oh_my_zsh_dir }}"
       register: oh_my_zsh_status
 
     - name: Installer Oh My Zsh de manière non interactive
+      ansible.builtin.command:
+        cmd: >
+          sh -c "$(curl -fsSL {{ oh_my_zsh_install_script }})" "" --unattended
       become_user: "{{ user }}"
-      shell: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+      environment:
+        HOME: "/home/{{ user }}"
       when: not oh_my_zsh_status.stat.exists
 
     - name: Assurer que le propriétaire du répertoire Oh My Zsh est correct
-      file:
-        path: "/home/{{ user }}/.oh-my-zsh"
+      ansible.builtin.file:
+        path: "{{ oh_my_zsh_dir }}"
         state: directory
         owner: "{{ user }}"
         group: "{{ user }}"
         recurse: true
+
+    - name: Assurer que le fichier .zshrc appartient à l'utilisateur
+      ansible.builtin.file:
+        path: "/home/{{ user }}/.zshrc"
+        state: file
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        mode: "0644"
+        force: no

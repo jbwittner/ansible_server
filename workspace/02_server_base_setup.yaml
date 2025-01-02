@@ -16,4 +16,5 @@
           - git
           - curl
           - micro
+          - btop
         state: present

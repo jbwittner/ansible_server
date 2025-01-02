@@ -1,0 +1,38 @@
+- name: Configuration de l'envirronement utilisateur
+  hosts: workspace
+  become: true
+  vars:
+    user: jbwittner  # Nom de l'utilisateur cible
+  tasks:
+    - name: Cloner le dépôt git dans le répertoire de configuration
+      git:
+        repo: https://github.com/jbwittner/linux_default_profile
+        dest: /home/{{ user }}/.configenv
+        update: yes
+        force: yes
+      become_user: "{{ user }}"
+    - name: Copier le fichier de conf zsh local
+      copy:
+        src: /home/{{ user }}/.configenv/zsh/model-zshrc.local.sh
+        dest: /home/{{ user }}/.configenv/zsh/.local.zshrc
+        owner: "{{ user }}"
+        group: "{{ user }}"
+      become_user: "{{ user }}"
+    - name: Faire le lien symbolique pour ZSH
+      file:
+        src: /home/{{ user }}/.configenv/zsh/.zshrc
+        dest: /home/{{ user }}/.zshrc
+        state: link
+        force: yes
+        owner: "{{ user }}"
+        group: "{{ user }}"
+      become_user: "{{ user }}"
+    - name: Faire le lien symbolique pour git
+      file:
+        src: /home/{{ user }}/.configenv/git/.gitconfig
+        dest: /home/{{ user }}/.gitconfig
+        state: link
+        force: yes
+        owner: "{{ user }}"
+        group: "{{ user }}"
+      become_user: "{{ user }}"

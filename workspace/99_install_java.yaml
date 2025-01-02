@@ -6,12 +6,11 @@
   tasks:
     # 2. Installer les dépendances nécessaires pour SDKMAN!
     - name: Installer curl et zip (dépendances SDKMAN)
-      apt:
+      dnf:
         name:
           - curl
           - zip
         state: present
-      when: ansible_os_family == "Debian"
 
     # 3. Télécharger et installer SDKMAN!
     - name: Télécharger et installer SDKMAN!
@@ -23,20 +22,6 @@
       become_user: "{{ user }}"
 
     # 4. Ajouter SDKMAN! au fichier .bashrc
-    - name: Ajouter SDKMAN! au fichier .bashrc
-      lineinfile:
-        path: "/home/{{ user }}/.bashrc"
-        line: |
-          export SDKMAN_DIR="/home/{{ user }}/.sdkman"
-          [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
-        state: present
-      owner: "{{ user }}"
-      group: "{{ user }}"
-
-    # 5. (Optionnel) Installer un SDK via SDKMAN! (ex. Java)
-    - name: Installer Java via SDKMAN!
-      shell: |
-        source /home/{{ user }}/.sdkman/bin/sdkman-init.sh && sdk install java
-      args:
-        executable: /bin/bash
+    - name: Initialiser SDKMAN!
+      shell: "source /home/{{ user }}/.sdkman/bin/sdkman-init.sh"
       become_user: "{{ user }}"

@@ -1,0 +1,42 @@
+- name: Installer les outiks pour Kubernetes sur un serveur Fedora
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Écrire le fichier de configuration du dépôt Kubernetes
+      ansible.builtin.copy:
+        dest: /etc/yum.repos.d/kubernetes.repo
+        content: |
+          [kubernetes]
+          name=Kubernetes
+          baseurl=https://pkgs.k8s.io/core:/stable:/v1.32/rpm/
+          enabled=1
+          gpgcheck=1
+          gpgkey=https://pkgs.k8s.io/core:/stable:/v1.32/rpm/repodata/repomd.xml.key
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Nettoyer les métadonnées YUM
+      ansible.builtin.command:
+        cmd: yum clean all
+
+    - name: Installer kubectl
+      ansible.builtin.yum:
+        name: kubectl
+        state: latest
+
+    - name: Vérifier l'installation de kubectl
+      ansible.builtin.command:
+        cmd: kubectl version --client
+      register: kubectl_version
+
+    - name: Afficher la version de kubectl installée
+      ansible.builtin.debug:
+        msg: "{{ kubectl_version.stdout }}"
+
+    - name: Installer des outils
+      dnf:
+        name:
+          - helm
+        state: present

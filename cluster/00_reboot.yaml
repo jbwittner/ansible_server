@@ -1,0 +1,7 @@
+- name: Effectuer un reboot de la machine
+  hosts: cluster
+  become: true
+  tasks:
+    - name: Reboot de la machine
+      ansible.builtin.reboot:
+        msg: "Reboot de la machine pour appliquer les changements"

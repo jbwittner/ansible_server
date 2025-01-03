@@ -1,0 +1,11 @@
+- name: Installer K3s sur le serveur
+  hosts: cluster
+  become: yes
+  tasks:
+    - name: Télécharger et exécuter le script d'installation de K3s
+      shell: curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--write-kubeconfig-mode 644 --disable traefik --node-name k3s-master-01" sh -
+      register: k3s_install_result
+
+    - name: Vérifier si K3s a été installé avec succès
+      debug:
+        msg: "{{ k3s_install_result.stdout }}"
